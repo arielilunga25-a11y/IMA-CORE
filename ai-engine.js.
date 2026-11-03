@@ -1,0 +1,56 @@
+const OpenAI = require("openai");
+const { GoogleGenAI } = require("@google/genai");
+
+async function askIMA(message) {
+
+// Moteur OpenAI
+if (process.env.OPENAI_API_KEY) {
+try {
+const client = new OpenAI({
+apiKey: process.env.OPENAI_API_KEY
+});
+
+  const response = await client.responses.create({
+    model: process.env.OPENAI_MODEL || "gpt-5.5",
+    instructions: "Tu es IMA AI, un assistant intelligent, professionnel, multilingue et serviable.",
+    input: message
+  });
+
+  return {
+    provider: "OpenAI",
+    answer: response.output_text
+  };
+
+} catch (error) {
+  console.error("OpenAI indisponible :", error.message);
+}
+
+}
+
+// Moteur Google Gemini
+if (process.env.GEMINI_API_KEY) {
+try {
+const client = new GoogleGenAI({
+apiKey: process.env.GEMINI_API_KEY
+});
+
+  const response = await client.models.generateContent({
+    model: process.env.GEMINI_MODEL || "gemini-flash-latest",
+    contents: message
+  });
+
+  return {
+    provider: "Gemini",
+    answer: response.text
+  };
+
+} catch (error) {
+  console.error("Gemini indisponible :", error.message);
+}
+
+}
+
+throw new Error("Aucun moteur IA disponible.");
+}
+
+module.exports = { askIMA };
